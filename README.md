@@ -1,6 +1,6 @@
 # Módulo 6 - Ponderada 3 - Turtlebot teleoperado pt2
 ## 🔍 Descrição
-Este projeto é uma extensão da atividade anterior (Turtlebot Teleoperado Pt. 1), que agora inclui uma interface de usuário capaz de exibir a imagem vista por uma câmera em tempo real. O sistema foi implementado para funcionar tanto com um robô real quanto com um ambiente simulado, permitindo a transmissão de um arquivo de vídeo qualquer no caso da simulação.
+Este projeto é uma extensão da atividade anterior (Turtlebot Teleoperado Pt. 1), que agora inclui uma interface de usuário capaz de exibir a imagem vista por uma câmera em tempo real. O sistema foi implementado para funcionar tanto com um robô real quanto com um ambiente simulado.
 ![mod6pond3_1_](https://github.com/lidiamariano/Mod6Pond3/assets/123901342/9d180069-b3c9-40c3-8c9d-ab09925678d8)
 
 ## 💻 Estrutura do projeto
