@@ -1,65 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
+    <meta charset="utf-8" />
+    <!-- ROS libraries -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
 
-<!-- ROS libraries -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <style>
+        .control-button {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+        }
+    </style>
 
-<script type="text/javascript">
-  var ros = new ROSLIB.Ros({
-    url : 'ws://10.128.0.17:9090'
-  });
+    <script type="text/javascript">
+        var ros = new ROSLIB.Ros({
+            url: 'ws://localhost:9090' // Atualize com o endereço correto do seu servidor ROS
+        });
 
-  ros.on('connection', function() {
-    console.log('Connected to websocket server.');
-  });
+        ros.on('connection', function() {
+            console.log('Connected to websocket server.');
+        });
 
-  ros.on('error', function(error) {
-    console.log('Error connecting to websocket server: ', error);
-  });
+        ros.on('error', function(error) {
+            console.log('Error connecting to websocket server: ', error);
+        });
 
-  ros.on('close', function() {
-    console.log('Connection to websocket server closed.');
-  });
+        ros.on('close', function() {
+            console.log('Connection to websocket server closed.');
+        });
 
-  // Topic to receive video frames
-  var videoTopic = new ROSLIB.Topic({
-    ros : ros,
-    name : '/video_frames',
-    messageType : 'sensor_msgs/CompressedImage'
-  });
+        // Topic to receive video frames
+        var videoTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/video_frames',
+            messageType: 'sensor_msgs/CompressedImage'
+        });
 
-  // Topic to receive FPS and latency information
-  var fpsTopic = new ROSLIB.Topic({
-    ros : ros,
-    name : '/fps',
-    messageType : 'std_msgs/String'
-  });
+        // Topic to receive FPS and latency information
+        var fpsTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/fps',
+            messageType: 'std_msgs/String'
+        });
 
-  // Function to handle incoming video frames
-  videoTopic.subscribe(function(message) {
-    var img = document.getElementById('videoStream');
-    img.src = 'data:image/jpeg;base64,' + message.data;
-  });
+        // Topic to send movement commands
+        var cmdVelTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: '/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
 
-  // Function to handle incoming FPS and latency messages
-  fpsTopic.subscribe(function(message) {
-    var fpsDisplay = document.getElementById('fpsDisplay');
-    fpsDisplay.innerText = message.data;
-  });
+        // Function to handle incoming video frames
+        videoTopic.subscribe(function(message) {
+            var img = document.getElementById('videoStream');
+            img.src = 'data:image/jpeg;base64,' + message.data;
+        });
 
-  window.onload = function() {
-    // Subscribe to video frames and FPS once
-    videoTopic.subscribe();
-    fpsTopic.subscribe();
-  };
-</script>
+        // Function to handle incoming FPS and latency messages
+        fpsTopic.subscribe(function(message) {
+            var fpsDisplay = document.getElementById('fpsDisplay');
+            fpsDisplay.innerText = message.data;
+        });
+
+        function sendCommand(linear, angular) {
+            var twist = new ROSLIB.Message({
+                linear: {
+                    x: linear,
+                    y: 0.0,
+                    z: 0.0
+                },
+                angular: {
+                    x: 0.0,
+                    y: 0.0,
+                    z: angular
+                }
+            });
+            cmdVelTopic.publish(twist);
+        }
+
+        window.onload = function() {
+            videoTopic.subscribe();
+            fpsTopic.subscribe();
+
+            document.getElementById('forward').addEventListener('click', function() {
+                sendCommand(0.5, 0.0);
+            });
+            document.getElementById('backward').addEventListener('click', function() {
+                sendCommand(-0.5, 0.0);
+            });
+            document.getElementById('left').addEventListener('click', function() {
+                sendCommand(0.0, 1.0);
+            });
+            document.getElementById('right').addEventListener('click', function() {
+                sendCommand(0.0, -1.0);
+            });
+            document.getElementById('stop').addEventListener('click', function() {
+                sendCommand(0.0, 0.0);
+            });
+        };
+    </script>
 </head>
 <body>
-  <h1>Real-time Video Stream from ROS2 Topic</h1>
-  <img id="videoStream" alt="Video Stream" style="width: 640px; height: 480px;" />
-  <h2>Latency and FPS: <span id="fpsDisplay">Waiting for data...</span></h2>
+    <h1>Real-time Video Stream and Control Panel for Turtlebot</h1>
+    <div>
+        <h2>Video Stream</h2>
+        <img id="videoStream" alt="Video Stream" style="width: 640px; height: 480px;" />
+        <h2>Latency and FPS: <span id="fpsDisplay">Waiting for data...</span></h2>
+    </div>
+    <div>
+        <h2>Control Panel</h2>
+        <button id="forward" class="control-button">↑</button><br>
+        <button id="left" class="control-button">←</button>
+        <button id="stop" class="control-button">⏹️</button>
+        <button id="right" class="control-button">→</button><br>
+        <button id="backward" class="control-button">↓</button>
+    </div>
+    <div>
+        <h2>Operational Status</h2>
+        <p id="statusDisplay">All systems go.</p>
+    </div>
 </body>
 </html>
