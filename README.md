@@ -12,6 +12,7 @@ Este projeto é uma extensão da atividade anterior (Turtlebot Teleoperado Pt. 1
 ### Pré-requisitos
 - Ubuntu
 - ROS 2
+- ROSbridge
 - Webots
 - Python
 - Uma câmera conectada ao sistema
